@@ -1,9 +1,10 @@
 .PHONY: all
 # Data
+reactions:=N13 O15 F17 pp B8 hep
 BP2004: Data/BP2004/gs98/model.dat Data/BP2004/gs98/flux.dat
 BSBGS98: Data/BP2005/gs98/model.dat Data/BP2005/gs98/flux.dat Data/BP2005/gs98/preview.h5
 BSBAGS05: Data/BP2005/ags05/model.dat Data/BP2005/ags05/flux.dat
-SPECTRA: Data/SPECTRA/Be7.dat Data/SPECTRA/B8.dat Data/SPECTRA/N13.dat Data/SPECTRA/O15.dat Data/SPECTRA/F17.dat Data/SPECTRA/pp.dat Data/SPECTRA/hep.dat
+SPECTRA: Data/SPECTRA/Be7.dat Data/SPECTRA/B8.dat Data/SPECTRA/N13.dat Data/SPECTRA/O15.dat Data/SPECTRA/F17.dat Data/SPECTRA/pp.dat Data/SPECTRA/hep.dat Data/SPECTRA/preview.h5
 CROSSSECTION:
 # Data
 Data/SPECTRA/Be7.dat:
@@ -33,7 +34,8 @@ Data/SPECTRA/T_table.dat:
 Data/SPECTRA/T2_table.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/Momentsspectra/T2_table.dat -O $@
-
+Data/SPECTRA/preview.h5: $(reactions:%=Data/SPECTRA/%.dat)
+	python3 SpectraPreview.py -i $^ --reactions $(reactions) -o $@ --models Data/BP2005/gs98/preview.h5
 Data/BP2004/gs98/model.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/BP2004/bp2004stdmodel.dat -O $@
