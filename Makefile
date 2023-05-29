@@ -6,7 +6,12 @@ BSBGS98: Data/BP2005/gs98/model.dat Data/BP2005/gs98/flux.dat Data/BP2005/gs98/p
 BSBAGS05: Data/BP2005/ags05/model.dat Data/BP2005/ags05/flux.dat
 SPECTRA: Data/SPECTRA/Be7.dat Data/SPECTRA/B8.dat Data/SPECTRA/N13.dat Data/SPECTRA/O15.dat Data/SPECTRA/F17.dat Data/SPECTRA/pp.dat Data/SPECTRA/hep.dat Data/SPECTRA/preview.h5
 CROSSSECTION:
+OSCPARAS: Data/OSCPARAS/v52.release-SKoff-NO.txt Data/OSCPARAS/v52.release-SKoff-IO.txt
 # Data
+Data/OSCPARAS/%:
+	mkdir -p $(dir $@)
+	wget http://www.nu-fit.org/sites/default/files/$*.xz -O $@
+	unxz -d $@.xz
 Data/SPECTRA/Be7.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/7Belineshape/7belineshape.dat -O $@
@@ -67,11 +72,8 @@ Data/B16%/preview.h5: Data/B16%/model.dat
 	python3 SSMPreview.py -i $^ -o $@ --ssm B16 > $@.log 2>&1
 	python3 SSMPreview.py -i $^ -o $@ --ssm B16 --plot 
 # Predict
-Predict/%/fluxSolar.h5: Data/%/preview.h5
-	python3 evolutionSolar.py -i $^ -o $@
-Predict/%/fluxVaccum.h5: Predict/%/fluxSolar.h5
-	python3 evolutionVaccum.py -i $^ -o $@
-Predict/%/fluxEarth.h5: Predict/%/fluxVaccum.h5
+Data/%/fluxSolar.h5: Data/%/preview.h5 $(reactions:%=Data/SPECTRA/%.dat)
+	python3 NeutrinoEvolution.py -i $< -o $@ --spectra $(reactions:%=Data/SPECTRA/%.dat) --reactions $(reactions)
+	python3 NeutrinoEvolution.py -i $@ -o $@.pdf --reactions $(reactions) --plot
+Data/%/fluxEarth.h5: Predict/%/fluxVaccum.h5
 	python3 evolutionEarth.py -i $@ -o $@
-Predict/%.pdf: Predict/%.h5
-	python3 evolutionPlot.py -i $^ -o $@
