@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 plt.style.use('./journal.mplstyle')
 from matplotlib.backends.backend_pdf import PdfPages
 from config import spectraConfig
+from Oscillation import V_e, MSW_Adiabatic
 psr = argparse.ArgumentParser()
 psr.add_argument('-i', dest='ipt', nargs='+', help='spectra files')
 psr.add_argument('-o', dest='opt', help='output summary file')
@@ -21,7 +22,11 @@ figureDatas = []
 fluxDatas = []
 for model in args.models:
     with h5py.File(model, 'r') as ipt:
-       fluxDatas.append({'flux': ipt['TotalFlux'][:], 'power': ipt.attrs['power']})
+       fluxDatas.append({
+           'TotalFlux': ipt['TotalFlux'][:],
+           'power': ipt.attrs['power'],
+           'Flux': ipt['Flux'][:]
+           })
 
 if True:
     for reaction, f in zip(reactions, files):
@@ -54,7 +59,6 @@ if True:
         ax.set_yscale('log')
         pdf.savefig(fig)
         ax.set_xscale('log')
-        # ax.legend()
         pdf.savefig(fig)
         plt.close()
         # Rate Preview
@@ -63,7 +67,7 @@ if True:
             for reactionData, reaction in zip(figureDatas, reactions):
                 if reactionData.continous:
                     ls = '-' if reaction in reactions_pp else '--'
-                    ys = reactionData.spectra['P'] * (flux['flux'][reaction]*10**flux['power'])
+                    ys = reactionData.spectra['P'] * (flux['TotalFlux'][reaction]*10**flux['power'])
                     ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
                     xi = int(np.argmax(reactionData.spectra['P'])*spectraConfig[reaction]['x'])
                     ax.text(s=spectraConfig[reaction]['label'], x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], color=spectraConfig[reaction]['color'])
@@ -77,3 +81,30 @@ if True:
             ax.set_xscale('log')
             pdf.savefig(fig)
             plt.close()
+            # Upturn Preview
+            fig, ax = plt.subplots()
+            Es = np.arange(0.1, 20, 0.1)
+            Pee = MSW_Adiabatic(Es, V_e(10**flux['Flux']['Log10_e_rho'][0]))
+            ax.plot(Es, Pee, label='MSW-LMA')
+            ax.set_ylabel('$P_{ee}$')
+            ax.set_xlabel(r'$E_{\nu}$[MeV]')
+            ax.set_xlim([0.1, 20])
+            ax.set_ylim([0.1, 0.8])
+            ax.set_xscale('log')
+            ax.legend()
+            pdf.savefig(fig)
+            plt.close()
+            fig, ax = plt.subplots()
+            V_es = V_e(10**flux['Flux']['Log10_e_rho'])
+            X, Y = np.meshgrid(flux['Flux']['R'], Es)
+            Pee = MSW_Adiabatic(Es, V_es)
+            CS = ax.contour(X, Y, Pee, origin='lower', levels=np.arange(0.2,0.7,0.02), cmap='flag')
+            ax.clabel(CS, CS.levels, inline=True, fmt='%.2f', fontsize=12)
+            ax.set_xlabel('$R$')
+            ax.set_ylabel(r'$E_{\nu}$[MeV]')
+            ax.set_ylim([0.1, 20])
+            ax.set_xlim([0, 0.5])
+            ax.legend()
+            pdf.savefig(fig)
+            plt.close()
+
