@@ -1,10 +1,13 @@
 import numpy as np
 import pandas as pd
 def SSMReaderFactory(SSMType):
-    if SSMType == 'BSB':
-        reader = BSBReader()
-    elif SSMType == 'MB22':
-        reader = MB22Reader()
+    model, abundance = SSMType.split('/')
+    if model == 'BP2004' or model == 'BP2005':
+        reader = BSBReader(model, abundance)
+    elif model == 'B16':
+        reader = B16Reader(model, abundance)
+    elif model == 'MB22':
+        reader = MB22Reader(model, abundance)
     else:
         return 0
     return reader
@@ -18,12 +21,18 @@ def SpectraReaderFactory(reaction, f):
     else:
         return 0
     return reader
-class BSBReader():
-    def __init__(self):
+
+class Reader():
+    def __init__(self, model, abundance):
+        self.model = model
+        self.abundance = abundance
+class BSBReader(Reader):
+    def __init__(self, model, abundance):
+        Reader.__init__(self, model, abundance)
         self.skipSSMHeader = 23
         self.skipSSMFooter = 3
         self.skipFluxHeader = 27
-        self.modelNames = ['M', 'R', 'T', 'Rho', 'P', 'L', 'X', 'Y', 'He3', 'C12', 'N14', 'O16']
+        self.modelNames = ['Mass', 'Radius', 'Temp', 'Rho', 'Pres', 'Lumi', 'X', 'Y', 'He3', 'C12', 'N14', 'O16']
         self.fluxNames = ['R', 'T', 'Log10_e_rho', 'M', 'Be7_M', 'pp', 'B8', 'N13', 'O15', 'F17', 'Be7', 'pep', 'hep']
         self.totalFluxNames = ['pp', 'pep', 'hep', 'Be7', 'B8', 'N13', 'O15', 'F17']
     def read(self, files):
@@ -32,14 +41,45 @@ class BSBReader():
     def readSSM(self, file):
         self.SSM = pd.read_csv(file, skiprows=self.skipSSMHeader, skipfooter=self.skipSSMFooter, sep='\s+', names=self.modelNames, engine='python')
         self.N = self.SSM.shape[0]
-        L_R = np.loadtxt(file, skiprows=self.skipSSMHeader + self.N + 1, delimiter='= ', dtype=[('label', 'U12'), ('value', float)])
+        if self.model == "BP2004":
+            L_R = np.genfromtxt(file, skip_header=self.skipSSMHeader + self.N + 1, delimiter=' ', dtype=[('label', 'U12'), ('value', float)])
+        else:
+            L_R = np.genfromtxt(file, skip_header=self.skipSSMHeader + self.N + 1, delimiter='= ', dtype=[('label', 'U12'), ('value', float)])
         self.Luminosity = L_R[0]['value']
         self.Radius = L_R[1]['value']
     def readFlux(self, file):
         self.Flux = pd.read_csv(file, skiprows=self.skipFluxHeader, sep='\s+', names=self.fluxNames)
         self.TotalFlux = pd.read_csv(file, skiprows=6, sep='\s+', nrows=1, names=self.totalFluxNames)
-        self.FluxPower = 10
+        # power is referred from astro-ph/0412440
+        self.FluxPower = np.repeat(10, self.TotalFlux.shape[0])
         # self.FluxUncertainty = 
+
+class B16Reader(Reader):
+    def __init__(self, model, abundance):
+        Reader.__init__(self, model, abundance)
+        self.skipSSMHeader = 9
+        self.skipSSMFooter = 0
+        self.skipFluxHeader = 22
+        # "Mass     Radius     Temp      Rho       Pres       Lumi      H1       He4      He3       C12       C13       N14        N15      O16       O17       O18        Ne        Na       Mg         Al        Si         P       S         Cl        Ar        K         Ca        Sc         Ti        V         Cr        Mn        Fe        Co        Ni".split()
+        self.modelNames = "Mass     Radius     Temp      Rho       Pres       Lumi      H1       He4      He3       C12       C13       N14        N15      O16       O17       O18        Ne        Na       Mg         Al        Si         P       S         Cl        Ar        K         Ca        Sc         Ti        V         Cr        Mn        Fe        Co        Ni".split()
+        self.fluxNames = ['R', 'T', 'Log10_e_rho', 'M', 'pp', 'pep', 'hep', 'Be7', 'B8', 'N13', 'O15', 'F17']
+        self.totalFluxNames = ['pp', 'pep', 'hep', 'Be7', 'B8', 'N13', 'O15', 'F17']
+    def read(self, files):
+        self.readSSM(files[0])
+        self.readFlux(files[1])
+    def readSSM(self, file):
+        self.SSM = pd.read_csv(file, skiprows=self.skipSSMHeader, skipfooter=self.skipSSMFooter, sep='\s+', names=self.modelNames, engine='python')
+        self.N = self.SSM.shape[0]
+    def readFlux(self, file):
+        self.Flux = pd.read_csv(file, skiprows=self.skipFluxHeader, sep='\s+', names=self.fluxNames)
+        # total flux come from [https://arxiv.org/abs/1611.09867]
+        if self.abundance == "gs98":
+            self.TotalFlux = pd.DataFrame(columns=self.totalFluxNames, data=np.array([5.98, 1.44, 7.98, 4.93, 5.46, 2.78, 2.05, 5.29])[np.newaxis,:])
+        else:
+            # agss09
+            self.TotalFlux = pd.DataFrame(columns=self.totalFluxNames, data=np.array([6.03, 1.46, 8.25, 4.50, 4.50, 2.04, 1.44, 3.26])[np.newaxis,:])
+        self.FluxPower = np.array([10, 8, 3, 9, 6, 8, 8, 6])
+        
 class MB22Reader():
     def read(self, file):
        pass 
