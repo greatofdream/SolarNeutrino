@@ -11,6 +11,7 @@ def SSMReaderFactory(SSMType):
     else:
         return 0
     return reader
+
 def SpectraReaderFactory(reaction, f):
     if reaction == 'pp':
         reader = PPReader(f)
@@ -18,6 +19,10 @@ def SpectraReaderFactory(reaction, f):
         reader = SpectraBareTwoColReader(f)
     elif reaction == 'B8':
         reader = B8Reader(f)
+    elif reaction == 'Be7':
+        reader = Be7Reader(f)
+    elif reaction == 'pep':
+        reader = PepReader(f)
     else:
         return 0
     return reader
@@ -73,6 +78,7 @@ class B16Reader(Reader):
     def readFlux(self, file):
         self.Flux = pd.read_csv(file, skiprows=self.skipFluxHeader, sep='\s+', names=self.fluxNames)
         # total flux come from [https://arxiv.org/abs/1611.09867]
+        # it is also store in data/B16/flux.dat
         if self.abundance == "gs98":
             self.TotalFlux = pd.DataFrame(columns=self.totalFluxNames, data=np.array([5.98, 1.44, 7.98, 4.93, 5.46, 2.78, 2.05, 5.29])[np.newaxis,:])
         else:
@@ -83,6 +89,7 @@ class B16Reader(Reader):
 class MB22Reader():
     def read(self, file):
        pass 
+
 class B8Reader():
     def __init__(self, file, continous=True):
         self.skipFooter = 2
@@ -91,6 +98,7 @@ class B8Reader():
         self.continous = continous
         self.spectra = pd.read_csv(file, skiprows=self.skipHeader, skipfooter=self.skipFooter, sep='\s+', names=self.header, engine='python')
         self.binwidth = self.spectra.iloc[1]['E']-self.spectra.iloc[0]['E']
+
 class PPReader():
     def __init__(self, file, continous=True):
         self.header = ['E', 'P']
@@ -98,19 +106,31 @@ class PPReader():
         rawdata = np.loadtxt(file, skiprows=3)
         self.spectra = pd.DataFrame({ self.header[0]: np.ravel(rawdata[:,::2], order='F'), self.header[1]: np.ravel(rawdata[:,1::2], order='F')})
         self.binwidth = self.spectra.iloc[1]['E']-self.spectra.iloc[0]['E']
+
 class SpectraBareTwoColReader():
     def __init__(self, file, continous=True):
         self.header = ['E', 'P']
         self.continous = continous
         self.spectra = pd.read_csv(file, sep='\s+', names=self.header, engine='python')
         self.binwidth = self.spectra.iloc[1]['E']-self.spectra.iloc[0]['E']
+
 class Be7Reader():
     def __init__(self, file, continous=False):
-        self.header = ['E', 'P']
+        self.header = ['dE', 'P']
         self.N = 92
         self.continous = continous
         self.spectraNum = 2
-        self.Es = np.array([np.loadtxt(file, skiprows=1, delimiter=' keV)', max_rows=1), np.loadtxt(file, skiprows=self.N+3+2, delimiter=' keV)', max_rows=1)])
+        self.Es = np.array([861.3, 384.3]) #np.array([np.loadtxt(file, skiprows=1, delimiter=' keV)', max_rows=1), np.loadtxt(file, skiprows=self.N+3+2, delimiter=' keV)', max_rows=1)])
         self.spectra_1 = pd.read_csv(file, sep='\s+', skiprows=3, nrows=self.N, names=self.header, engine='python')
         self.spectra_2 = pd.read_csv(file, sep='\s+', skiprows=3*2+1+self.N, nrows=self.N, names=self.header, engine='python')
+        self.spectra_1['E'] = (self.Es[0] + self.spectra_1['dE']) * 1E-3
+        self.spectra_2['E'] = (self.Es[1] + self.spectra_2['dE']) * 1E-3
+        # For the monochromatic spectra, just use the probability
+        # self.spectra_1['P'] = self.spectra_1['P'] * 1E3
+        # self.spectra_2['P'] = self.spectra_2['P'] * 1E3
+        self.branchRatio = np.array([0.897, 0.103]) # 10.1103/PhysRevD.49.3923, ground-state and excited-state
+        self.spectra = pd.DataFrame({'E': [self.Es[0]*1E-3, self.Es[0]*1E-3, self.Es[1]*1E-3, self.Es[1]*1E-3], 'P': [self.branchRatio[0], 1E-11, 1E-11, self.branchRatio[1]]})
 
+class PepReader():
+    def __init__(self, file, continous=False):
+        self.spectra = pd.DataFrame({'E': [1.44, 1.44], 'P': [1, 1E-10]})

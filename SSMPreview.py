@@ -28,7 +28,7 @@ if not args.plot:
         opt.attrs['power'] = ssmReader.FluxPower
         opt.create_dataset('SSM', data=ssm.to_records(), compression='gzip')
         opt.create_dataset('Flux', data=flux.to_records(), compression='gzip')
-        opt.create_dataset('totalFlux', data=ssmReader.TotalFlux.to_records(), compression='gzip')
+        opt.create_dataset('TotalFlux', data=ssmReader.TotalFlux.to_records(), compression='gzip')
 else:
     with h5py.File(args.ipt[0], 'r') as ipt:
        ssm, flux = ipt['SSM'][:], ipt['Flux'][:]
@@ -49,6 +49,8 @@ else:
         axs[-1].xaxis.set_minor_locator(MultipleLocator(0.01))
         axs[-1].set_xlim([0, 1])
         pdf.savefig(fig)
+        for i in range(1, 4):
+            axs[i].set_yscale('log')
         plt.close()
 
         # Flux Preview
