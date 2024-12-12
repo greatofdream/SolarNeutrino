@@ -64,7 +64,7 @@ if True:
             fig, ax = plt.subplots()
             for reactionData, reaction in zip(figureDatas, reactions):
                 ls = '-' if reaction in reactions_pp else '--'
-                ys = reactionData.spectra['P'] * (flux['TotalFlux'][reaction]*10**flux['power'])
+                ys = reactionData.spectra['P'] * (flux['TotalFlux'][reaction] * 10 ** flux['power'][reaction])
                 ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
                 xi = int(np.argmax(reactionData.spectra['P'])*spectraConfig[reaction]['x'])
                 ax.text(s=spectraConfig[reaction]['label'], x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], color=spectraConfig[reaction]['color'])

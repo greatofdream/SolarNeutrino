@@ -25,7 +25,7 @@ if not args.plot:
         opt.attrs['type'] = args.ssm
         # opt.attrs['Luminosity'] = ssmReader.Luminosity
         # opt.attrs['Radius'] = ssmReader.Radius
-        opt.attrs['power'] = ssmReader.FluxPower
+        opt.attrs['power'] = ssmReader.FluxPower.to_records()
         opt.create_dataset('SSM', data=ssm.to_records(), compression='gzip')
         opt.create_dataset('Flux', data=flux.to_records(), compression='gzip')
         opt.create_dataset('TotalFlux', data=ssmReader.TotalFlux.to_records(), compression='gzip')

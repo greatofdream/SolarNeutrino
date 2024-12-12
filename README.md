@@ -10,8 +10,9 @@
     + B16 use `gs98` and `agss09`, [data location](https://aliga.ice.csic.es/personal/aldos/Solar_Data.html), [origin data location provided in paper](http://www.ice.cat/personal/aldos/Solar_Data.html) is not accessible.
     + ...: Maybe X25?
   + `model.dat`: the structure (density, temperature, pressure et al.) of the solar; `flux.dat`: flux versus the solar radius.
-+ The pattern of spectra data: `data/[Model Name]/SPECTRA/[reaction|element].dat`
++ The pattern of spectra data: `SPECTRA/[reaction|element].dat`
   + `reaction|element`: pp, hep, B8, Be7, N13, O15, F17 neutrino energy spectra.
+  + The shape of spectra is uncorrelated with the flux. The final spectra is the product of the shape and the flux of the model with different [Abundance]
 + The pattern of crosssection data: `CROSSSECTION/[reaction|element].dat`
 + Preview data and figure
   + `preview.h5`: summary of data

@@ -1,10 +1,12 @@
 .PHONY: all
+all: data/BP2004/gs98/preview.h5 data/BP2005/gs98/preview.h5 data/BP2005/ags05/preview.h5 data/B16/gs98/preview.h5 data/B16/agss09/preview.h5
+all: data/BP2004/gs98/fluxSolar.h5 data/BP2005/gs98/fluxSolar.h5 data/BP2005/ags05/fluxSolar.h5 data/B16/gs98/fluxSolar.h5 data/B16/agss09/fluxSolar.h5
 # data
-reactions:=N13 O15 F17 pp B8 hep Be7
+reactions:=N13 O15 F17 pp B8 hep
 # BP2004
 BP2004: data/BP2004/gs98/model.dat data/BP2004/gs98/flux.dat
 # BP2005
-BSBGS98: data/BP2005/gs98/model.dat data/BP2005/gs98/flux.dat data/BP2005/gs98/preview.h5
+BSBGS98: data/BP2005/gs98/model.dat data/BP2005/gs98/flux.dat
 BSBAGS05: data/BP2005/ags05/model.dat data/BP2005/ags05/flux.dat
 # B16
 B16: data/B16/gs98/model.dat data/B16/gs98/flux.dat data/B16/agss09/model.dat data/B16/agss09/flux.dat data/B16/spectra.dat
@@ -50,7 +52,7 @@ data/SPECTRA/T2_table.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/Momentsspectra/T2_table.dat -O $@
 data/SPECTRA/preview.h5: $(reactions:%=data/SPECTRA/%.dat)
-	python3 SpectraPreview.py -i $^ pep.dat --reactions $(reactions) pep -o $@ --models data/BP2005/gs98/preview.h5
+	python3 SpectraPreview.py -i $^ data/SPECTRA/Be7.dat pep.dat --reactions $(reactions) Be7 pep -o $@ --models data/BP2005/gs98/preview.h5
 
 data/BP2004/gs98/model.dat:
 	mkdir -p $(dir $@)
@@ -101,6 +103,7 @@ data/Mesa%/preview.h5: data/Mesa%/model.dat
 # Predict
 data/%/fluxSolar.h5: data/%/preview.h5 $(reactions:%=data/SPECTRA/%.dat)
 	python3 NeutrinoEvolution.py -i $< -o $@ --spectra $(reactions:%=data/SPECTRA/%.dat) --reactions $(reactions)
-	python3 NeutrinoEvolution.py -i $@ -o $@.pdf --reactions $(reactions) pep --plot
+	python3 NeutrinoEvolution.py -i $@ -o $@.pdf --reactions $(reactions) --plot
 data/%/fluxEarth.h5: Predict/%/fluxVaccum.h5
 	python3 evolutionEarth.py -i $@ -o $@
+.DELETE_ON_ERROR:

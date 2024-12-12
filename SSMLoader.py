@@ -56,7 +56,7 @@ class BSBReader(Reader):
         self.Flux = pd.read_csv(file, skiprows=self.skipFluxHeader, sep='\s+', names=self.fluxNames)
         self.TotalFlux = pd.read_csv(file, skiprows=6, sep='\s+', nrows=1, names=self.totalFluxNames)
         # power is referred from astro-ph/0412440
-        self.FluxPower = np.repeat(10, self.TotalFlux.shape[0])
+        self.FluxPower = pd.DataFrame(columns=self.totalFluxNames, data=np.repeat(10, self.TotalFlux.shape[1])[np.newaxis,:])
         # self.FluxUncertainty = 
 
 class B16Reader(Reader):
@@ -84,7 +84,7 @@ class B16Reader(Reader):
         else:
             # agss09
             self.TotalFlux = pd.DataFrame(columns=self.totalFluxNames, data=np.array([6.03, 1.46, 8.25, 4.50, 4.50, 2.04, 1.44, 3.26])[np.newaxis,:])
-        self.FluxPower = np.array([10, 8, 3, 9, 6, 8, 8, 6])
+        self.FluxPower = pd.DataFrame(columns=self.totalFluxNames, data=np.array([10, 8, 3, 9, 6, 8, 8, 6])[np.newaxis,:])
         
 class MB22Reader():
     def read(self, file):
