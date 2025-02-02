@@ -1,5 +1,8 @@
 '''
 Preview and summary the SSM results
+1. SSM: model.dat, electron density vs radius
+2. Flux: flux.dat, flux vs radius
+3. TotalFlux: the total flux value
 '''
 import numpy as np, h5py
 from SSMLoader import SSMReaderFactory
@@ -58,7 +61,17 @@ else:
         for nu, label in zip(['pp', 'B8', 'Be7', 'pep', 'hep', 'N13', 'O15', 'F17'], ['pp', '8B', '7Be', 'pep', 'hep', '13N', '15O', '17F']):
             ax.plot(flux['R'], flux[nu], label=label)
         ax.set_ylabel('Fraction')
-        ax.set_xlabel('R[$R_{sum}$]')
+        ax.set_xlabel('R[$R_{sun}$]')
         ax.legend()
         pdf.savefig(fig)
         plt.close()
+
+        # electron density distribution
+        fig, ax = plt.subplots()
+        ax.plot(flux['R'], 10**flux['Log10_e_rho'], label='$e^-$')
+        ax.set_xlabel('R[$R_{sun}$]')
+        ax.set_ylabel('#[$\mathrm{N}_\mathrm{A}/\mathrm{cm}^3$]')
+        ax.legend()
+        pdf.savefig(fig)
+        plt.close()
+
