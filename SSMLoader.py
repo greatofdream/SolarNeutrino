@@ -33,6 +33,21 @@ class Reader():
     def __init__(self, model, abundance):
         self.model = model
         self.abundance = abundance
+    def calcQDensity(self):
+        # calculate the electron, u, d quark density
+        ## load the element information
+        Zs = np.empty(len(self.modelNames) - self.ele_offset, dtype=int)# proton
+        Ns = np.empty(len(self.modelNames) - self.ele_offset, dtype=int)# neutron
+        As = np.empty(len(self.modelNames) - self.ele_offset) # mass
+        for i, element_str in enumerate(self.modelNames[self.ele_offset:]):
+            ele = Element(element_str)
+            Zs[i], Ns[i], As[i] = ele.Z, ele.N, ele.mass
+
+        ## calculation
+        fraction = self.SSM.iloc[:, self.ele_offset:].to_numpy()
+        self.SSM['rho_e'] = self.SSM['Rho'] * np.sum(fraction * (Zs / As), axis=1)
+        self.SSM['rho_u'] = self.SSM['Rho'] * np.sum(fraction * ((2 * Zs + Ns) / As), axis=1)
+        self.SSM['rho_d'] = self.SSM['Rho'] * np.sum(fraction * ((Zs + 2 * Ns) / As), axis=1)
 
 class BSBReader(Reader):
     def __init__(self, model, abundance):
@@ -40,9 +55,10 @@ class BSBReader(Reader):
         self.skipSSMHeader = 23
         self.skipSSMFooter = 3
         self.skipFluxHeader = 27
-        self.modelNames = ['Mass', 'Radius', 'Temp', 'Rho', 'Pres', 'Lumi', 'H', 'He4', 'He3', 'C12', 'N14', 'O16']# X: H, Y:He4
+        self.modelNames = ['Mass', 'Radius', 'Temp', 'Rho', 'Pres', 'Lumi', 'H1', 'He4', 'He3', 'C12', 'N14', 'O16']# X: H, Y:He4
         self.fluxNames = ['R', 'T', 'Log10_e_rho', 'M', 'Be7_M', 'pp', 'B8', 'N13', 'O15', 'F17', 'Be7', 'pep', 'hep']
         self.totalFluxNames = ['pp', 'pep', 'hep', 'Be7', 'B8', 'N13', 'O15', 'F17']
+        self.ele_offset = 6
     def read(self, files):
         self.readSSM(files[0])
         self.readFlux(files[1])
@@ -72,6 +88,7 @@ class B16Reader(Reader):
         self.modelNames = "Mass     Radius     Temp      Rho       Pres       Lumi      H1       He4      He3       C12       C13       N14        N15      O16       O17       O18        Ne        Na       Mg         Al        Si         P       S         Cl        Ar        K         Ca        Sc         Ti        V         Cr        Mn        Fe        Co        Ni".split()
         self.fluxNames = ['R', 'T', 'Log10_e_rho', 'M', 'pp', 'pep', 'hep', 'Be7', 'B8', 'N13', 'O15', 'F17']
         self.totalFluxNames = ['pp', 'pep', 'hep', 'Be7', 'B8', 'N13', 'O15', 'F17']
+        self.ele_offset = 6
     def read(self, files):
         self.readSSM(files[0])
         self.readFlux(files[1])
@@ -144,10 +161,10 @@ class Element():
         res  = re.match('([^0-9]+)(\d*)', ele_string)
         self.ele_name = res.group(1)
         self.element = element(self.ele_name)
-        self.A = self.element.protons
+        self.Z = self.element.protons
         if res.group(2)!="":
             self.mass_num = int(res.group(2))
-            self.N = self.mass_num - self.A
+            self.N = self.mass_num - self.Z
             for iso in self.element.isotopes:
                 if iso.mass_number == self.mass_num:
                     self.mass = iso.mass
