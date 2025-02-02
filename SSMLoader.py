@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from mendeleev import element
+import re
 def SSMReaderFactory(SSMType):
     model, abundance = SSMType.split('/')
     if model == 'BP2004' or model == 'BP2005':
@@ -31,13 +33,14 @@ class Reader():
     def __init__(self, model, abundance):
         self.model = model
         self.abundance = abundance
+
 class BSBReader(Reader):
     def __init__(self, model, abundance):
         Reader.__init__(self, model, abundance)
         self.skipSSMHeader = 23
         self.skipSSMFooter = 3
         self.skipFluxHeader = 27
-        self.modelNames = ['Mass', 'Radius', 'Temp', 'Rho', 'Pres', 'Lumi', 'X', 'Y', 'He3', 'C12', 'N14', 'O16']
+        self.modelNames = ['Mass', 'Radius', 'Temp', 'Rho', 'Pres', 'Lumi', 'H', 'He4', 'He3', 'C12', 'N14', 'O16']# X: H, Y:He4
         self.fluxNames = ['R', 'T', 'Log10_e_rho', 'M', 'Be7_M', 'pp', 'B8', 'N13', 'O15', 'F17', 'Be7', 'pep', 'hep']
         self.totalFluxNames = ['pp', 'pep', 'hep', 'Be7', 'B8', 'N13', 'O15', 'F17']
     def read(self, files):
@@ -134,3 +137,21 @@ class Be7Reader():
 class PepReader():
     def __init__(self, file, continous=False):
         self.spectra = pd.DataFrame({'E': [1.44, 1.44], 'P': [1, 1E-10]})
+
+class Element():
+    def __init__(self, ele_string):
+        # split the mass number
+        res  = re.match('([^0-9]+)(\d*)', ele_string)
+        self.ele_name = res.group(1)
+        self.element = element(self.ele_name)
+        self.A = self.element.protons
+        if res.group(2)!="":
+            self.mass_num = int(res.group(2))
+            self.N = self.mass_num - self.A
+            for iso in self.element.isotopes:
+                if iso.mass_number == self.mass_num:
+                    self.mass = iso.mass
+        else:
+            self.mass_num = self.element.mass_number
+            self.N = self.element.neutrons
+            self.mass = self.element.mass
