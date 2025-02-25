@@ -7,6 +7,7 @@ import argparse
 import matplotlib.pyplot as plt
 plt.style.use('./journal.mplstyle')
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.ticker import MultipleLocator
 from config import spectraConfig
 from Oscillation import V_e, MSW_Adiabatic
 psr = argparse.ArgumentParser()
@@ -49,8 +50,8 @@ if True:
             ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
             xi = int(np.argmax(reactionData.spectra['P'])*spectraConfig[reaction]['x'])
             ax.text(s=spectraConfig[reaction]['label'], x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], color=spectraConfig[reaction]['color'])
-        ax.set_ylabel('P/MeV')
-        ax.set_xlabel(r'$E_{\nu}$/MeV')
+        ax.set_ylabel('PDF/MeV')
+        ax.set_xlabel(r'$E_{\nu}$[MeV]')
         ax.set_xlim([0.03, 20])
         ax.set_ylim(bottom=1E-6)
         ax.set_yscale('log')
@@ -67,7 +68,8 @@ if True:
                 ys = reactionData.spectra['P'] * (flux['TotalFlux'][reaction] * 10 ** flux['power'][reaction])
                 ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
                 xi = int(np.argmax(reactionData.spectra['P'])*spectraConfig[reaction]['x'])
-                ax.text(s=spectraConfig[reaction]['label'], x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], color=spectraConfig[reaction]['color'])
+                # text of the reaction and the uncertainty
+                ax.text(s=spectraConfig[reaction]['label'] + r'[$\pm$' + '{}%]'.format(spectraConfig[reaction]['error']), x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], rotation=spectraConfig[reaction]['rotation'], color=spectraConfig[reaction]['color'])
             ax.set_ylabel('Flux[cm$^{-2}$s$^{-1}$MeV$^{-1}$]')
             ax.set_xlabel(r'$E_{\nu}$[MeV]')
             ax.set_xlim([0.03, 20])
@@ -86,8 +88,10 @@ if True:
             ax.set_xlabel(r'$E_{\nu}$[MeV]')
             ax.set_xlim([0.1, 20])
             ax.set_ylim([0.1, 0.8])
-            ax.set_xscale('log')
+            ax.yaxis.set_minor_locator(MultipleLocator(0.02))
             ax.legend()
+            pdf.savefig(fig)
+            ax.set_xscale('log')
             pdf.savefig(fig)
             plt.close()
 
