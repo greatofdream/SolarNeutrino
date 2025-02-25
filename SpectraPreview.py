@@ -62,20 +62,36 @@ if True:
 
         # Rate Preview
         for flux in fluxDatas:
-            fig, ax = plt.subplots()
+            fig, axs = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [1, 6]})
+            axs[0].set_frame_on(False)
+            axs[0].xaxis.set_visible(False)
+            axs[0].yaxis.set_visible(False)
             for reactionData, reaction in zip(figureDatas, reactions):
                 ls = '-' if reaction in reactions_pp else '--'
                 ys = reactionData.spectra['P'] * (flux['TotalFlux'][reaction] * 10 ** flux['power'][reaction])
-                ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
+                axs[1].plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
                 xi = int(np.argmax(reactionData.spectra['P'])*spectraConfig[reaction]['x'])
                 # text of the reaction and the uncertainty
-                ax.text(s=spectraConfig[reaction]['label'] + r'[$\pm$' + '{}%]'.format(spectraConfig[reaction]['error']), x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], rotation=spectraConfig[reaction]['rotation'], color=spectraConfig[reaction]['color'])
-            ax.set_ylabel('Flux[cm$^{-2}$s$^{-1}$MeV$^{-1}$]')
-            ax.set_xlabel(r'$E_{\nu}$[MeV]')
-            ax.set_xlim([0.03, 20])
-            ax.set_ylim(bottom=0.1)
-            ax.set_yscale('log')
-            ax.set_xscale('log')
+                axs[1].text(s=spectraConfig[reaction]['label'] + r'[$\pm$' + '{}%]'.format(spectraConfig[reaction]['error']), x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], rotation=spectraConfig[reaction]['rotation'], color=spectraConfig[reaction]['color'])
+            axs[0].annotate("Ga", xy=(0.233, 0.1), xycoords='data', xytext=(10, 0.1),
+                arrowprops=dict(arrowstyle="<|-, widthA=0.5, widthB=2",
+                                connectionstyle="arc3", linewidth=3, color='g'), fontsize=10, color='g')
+            axs[0].annotate("Cl", xy=(0.814, 0.3), xycoords='data', xytext=(10, 0.3),
+                arrowprops=dict(arrowstyle="<|-, widthA=0.5, widthB=2",
+                connectionstyle="arc3", linewidth=3, color='r'), fontsize=10, color='r')
+            axs[0].annotate("Cerenkov", xy=(3.5, 0.5), xycoords='data', xytext=(10, 0.5),
+                arrowprops=dict(arrowstyle="<|-, widthA=0.5, widthB=2",
+                connectionstyle="arc3", linewidth=3, color='b'), fontsize=10, color='b')
+            axs[0].annotate("LS", xy=(0.2, 0.7), xycoords='data', xytext=(10, 0.7),
+                arrowprops=dict(arrowstyle="<|-, widthA=0.5, widthB=2",
+                connectionstyle="arc3", linewidth=3), fontsize=10)
+            axs[1].set_ylabel('Flux[cm$^{-2}$s$^{-1}$MeV$^{-1}$]')
+            axs[1].set_xlabel(r'$E_{\nu}$[MeV]')
+            axs[1].set_xlim([0.03, 20])
+            axs[1].set_ylim(bottom=0.1)
+            axs[1].set_yscale('log')
+            axs[1].set_xscale('log')
+            fig.subplots_adjust(hspace=0)
             pdf.savefig(fig)
             plt.close()
 
