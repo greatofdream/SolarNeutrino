@@ -110,9 +110,16 @@ else:
         # Flux Preview
         fig, ax = plt.subplots()
         for nu, label in zip(['pp', 'B8', 'Be7', 'pep', 'hep', 'N13', 'O15', 'F17'], ['pp', '8B', '7Be', 'pep', 'hep', '13N', '15O', '17F']):
-            ax.plot(flux['R'], flux[nu], label=label)
+            if nu in ['N13', 'O15', 'F17']:
+                ax.plot(flux['R'], flux[nu] / np.sum(flux[nu]), label=label, ls='--')
+            else:
+                ax.plot(flux['R'], flux[nu] / np.sum(flux[nu]), label=label)
+            print(np.sum(flux[nu]))
         ax.set_ylabel('Fraction')
-        ax.set_xlabel('R[$R_{sun}$]')
+        ax.set_xlabel('R[$R_\mathrm{sun}$]')
+        ax.set_xlim([0, 0.5])
+        ax.xaxis.set_major_locator(MultipleLocator(0.1))
+        ax.xaxis.set_minor_locator(MultipleLocator(0.02))
         ax.legend()
         pdf.savefig(fig)
         plt.close()
