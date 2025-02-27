@@ -4,7 +4,7 @@ from mendeleev import element
 import re
 def SSMReaderFactory(SSMType):
     model, abundance = SSMType.split('/')
-    if model == 'BP2004' or model == 'BP2005':
+    if model == 'BP2004' or model == 'BSB05':
         reader = BSBReader(model, abundance)
     elif model == 'B16':
         reader = B16Reader(model, abundance)
