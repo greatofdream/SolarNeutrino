@@ -1,5 +1,5 @@
 '''
-neutrino evolution in Solar and Vaccum, and Earth
+neutrino evolution in the Sun (Consider the element abundance distribution vs radius) and Vaccum, and Earth
 '''
 import numpy as np, pandas as pd, h5py
 from SSMLoader import SpectraReaderFactory
@@ -30,9 +30,13 @@ if not args.plot:
         spectraDatas.append(reactionReader)
     with h5py.File(args.opt, 'w') as opt:
         for spectraData, reaction in zip(spectraDatas, reactions):
+            # 2d Array: row is E, colum is abundance of element
+            # The row number is the E number which determined by the origin spectra file <element>.dat
+            # The column number is the number of radius in the model.dat
             Pee = MSW_Adiabatic(spectraData.spectra['E'].to_numpy(), V_e(10**fluxData['Flux']['Log10_e_rho']))
-            spectra = spectraData.spectra['P'].to_numpy() * np.sum(Pee * fluxData['Flux'][reaction], axis=1) * fluxData['TotalFlux'][reaction] * 10**fluxData['power'][reaction]
-            df = pd.DataFrame({ 'E': spectraData.spectra['E'], 'nu': spectra})
+            Pee_radius_mean = np.sum(Pee * fluxData['Flux'][reaction], axis=1) / np.sum(fluxData['Flux'][reaction])
+            spectra = spectraData.spectra['P'].to_numpy() * Pee_radius_mean * fluxData['TotalFlux'][reaction] * 10**fluxData['power'][reaction]
+            df = pd.DataFrame({ 'E': spectraData.spectra['E'], 'nu': spectra, 'Pee': Pee_radius_mean})
             df_origin = pd.DataFrame({ 'E': spectraData.spectra['E'], 'nu': spectraData.spectra['P'].to_numpy() * fluxData['TotalFlux'][reaction] * 10**fluxData['power'][reaction]})
             opt.create_dataset('Earth/'+reaction, data=df.to_records(), compression='gzip')
             opt.create_dataset('Origin/'+reaction, data=df_origin.to_records(), compression='gzip')
@@ -69,12 +73,14 @@ else:
             ax.legend()
             pdf.savefig(fig)
             plt.close()
-            if reaction=='B8':
-                fig, ax = plt.subplots()
-                ax.plot(spectra['E'], spectra['nu']/spectra_origin['nu'])
-                ax.set_xscale('log')
-                ax.set_xlabel(r'$E_{\nu}$[MeV]')
-                ax.set_ylabel('$P_{ee}$')
-                ax.set_title(reaction)
-                pdf.savefig(fig)
-                plt.close()
+        fig, ax = plt.subplots()
+        for spectra, spectra_origin, reaction in zip(spectraEarthDatas, spectraOriginDatas, args.reactions):
+            if reaction=='B8' or reaction=='hep':
+                ax.plot(spectra['E'], spectra['Pee'], label=reaction)
+        ax.set_xlabel(r'$E_{\nu}$[MeV]')
+        ax.set_ylabel('$P_{ee}$')
+        ax.legend()
+        pdf.savefig(fig)
+        ax.set_xscale('log')
+        pdf.savefig(fig)
+        plt.close()
