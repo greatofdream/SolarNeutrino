@@ -16,7 +16,7 @@ X25AGSS09:
 X25MB22:
 
 # spectra shpae
-SPECTRA: data/SPECTRA/Be7.dat data/SPECTRA/B8.dat data/SPECTRA/N13.dat data/SPECTRA/O15.dat data/SPECTRA/F17.dat data/SPECTRA/pp.dat data/SPECTRA/hep.dat data/SPECTRA/preview.h5
+SPECTRA: data/SPECTRA/Be7.dat data/SPECTRA/B8.dat data/SPECTRA/B8_winter.dat data/SPECTRA/N13.dat data/SPECTRA/O15.dat data/SPECTRA/F17.dat data/SPECTRA/pp.dat data/SPECTRA/hep.dat data/SPECTRA/preview.h5
 CROSSSECTION:
 OSCPARAS: data/OSCPARAS/v52.release-SKoff-NO.txt data/OSCPARAS/v52.release-SKoff-IO.txt
 # data
@@ -30,6 +30,11 @@ data/SPECTRA/Be7.dat:
 data/SPECTRA/B8.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/B8spectrum/b8spectrum.txt -O $@
+
+data/SPECTRA/B8_winter.dat:
+	mkdir -p $(dir $@)
+	wget https://journals.aps.org/prc/supplemental/10.1103/PhysRevC.73.025503/neutrino.txt -O $@
+	
 data/SPECTRA/N13.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/CNOspectra/n13.dat -O $@
