@@ -124,3 +124,18 @@ if True:
             pdf.savefig(fig)
             plt.close()
 
+        # Spectra Preview
+        fig, ax = plt.subplots()
+        for reactionData, reaction in zip(figureDatas, reactions):
+            if reaction in ['B8', 'hep']:
+                ys = reactionData.spectra['P']#/reactionData.binwidth
+                ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
+        ax.set_ylabel('PDF/MeV')
+        ax.set_xlabel(r'$E_{\nu}$[MeV]')
+        ax.set_xlim([0.03, 20])
+        ax.xaxis.set_minor_locator(MultipleLocator(0.5))
+        ax.xaxis.set_major_locator(MultipleLocator(2))
+        ax.legend()
+        pdf.savefig(fig)
+        plt.close()
+
