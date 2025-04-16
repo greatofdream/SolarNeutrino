@@ -4,8 +4,8 @@ import { viteBundler } from '@vuepress/bundler-vite'
 
 export default defineUserConfig({
   lang: 'en-US',
-  // change the base url accroding to your setting
-  base: '~greatofdream/solar',
+  // Please change the base url accroding to your setting when deploying
+  base: '/~greatofdream/solar',
 
   title: 'Solar Neutrino Webpage',
   description: 'Summary and data for the solar neutrino research',
