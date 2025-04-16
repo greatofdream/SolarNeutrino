@@ -39,7 +39,7 @@ else:
        ssm, flux = ipt['SSM'][:], ipt['Flux'][:]
     with PdfPages(args.opt) as pdf:
         # Model Preview
-        fig, axs = plt.subplots(5, 1, figsize=(12, 15), sharex=True)
+        fig, axs = plt.subplots(4, 1, figsize=(12, 12), sharex=True)
         fig.subplots_adjust(hspace=0)
         axs[0].plot(ssm['Radius'], ssm['Mass'])
         axs[0].set_ylabel('Mass')
@@ -49,8 +49,8 @@ else:
         axs[2].set_ylabel('T/K')
         axs[3].plot(ssm['Radius'], ssm['Pres'])
         axs[3].set_ylabel(r'$P[\mathrm{dyn/cm}^2]$')
-        axs[4].plot(flux['R'], 10**flux['Log10_e_rho'], label='$e^-$')# electron density distribution
-        axs[4].set_ylabel('#[$\mathrm{N}_\mathrm{A}/\mathrm{cm}^3$]')
+        # axs[4].plot(flux['R'], 10**flux['Log10_e_rho'], label='$e^-$')# electron density distribution
+        # axs[4].set_ylabel('#[$\mathrm{N}_\mathrm{A}/\mathrm{cm}^3$]')
         axs[-1].set_xlabel('R[$R_{sun}$]')
         axs[-1].xaxis.set_major_locator(MultipleLocator(0.1))
         axs[-1].xaxis.set_minor_locator(MultipleLocator(0.02))

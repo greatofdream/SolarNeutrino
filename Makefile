@@ -100,15 +100,21 @@ data/B16/flux.dat:
 
 # data Preview
 data/%/preview.h5: data/%/model.dat  data/%/flux.dat
-	python3 SSMPreview.py -i $^ -o $@ --ssm $(*) > $@.log 2>&1
-	python3 SSMPreview.py -i $@ -o $@.pdf --ssm $(*) --plot
+	python3 src/SSMPreview.py -i $^ -o $@ --ssm $(*) > $@.log 2>&1
+	python3 src/SSMPreview.py -i $@ -o $@.pdf --ssm $(*) --plot
 data/Mesa%/preview.h5: data/Mesa%/model.dat
-	python3 SSMPreview.py -i $^ -o $@ --ssm Mesa > $@.log 2>&1
-	python3 SSMPreview.py -i $^ -o $@ --ssm Mesa --plot 
+	python3 src/SSMPreview.py -i $^ -o $@ --ssm Mesa > $@.log 2>&1
+	python3 src/SSMPreview.py -i $^ -o $@ --ssm Mesa --plot 
+
 # Predict
 data/%/fluxSolar.h5: data/%/preview.h5 $(reactions:%=data/SPECTRA/%.dat)
-	python3 NeutrinoEvolution.py -i $< -o $@ --spectra $(reactions:%=data/SPECTRA/%.dat) --reactions $(reactions)
-	python3 NeutrinoEvolution.py -i $@ -o $@.pdf --reactions $(reactions) --plot
+	python3 src/NeutrinoEvolution.py -i $< -o $@ --spectra $(reactions:%=data/SPECTRA/%.dat) --reactions $(reactions)
+	python3 src/NeutrinoEvolution.py -i $@ -o $@.pdf --reactions $(reactions) --plot
 data/%/fluxEarth.h5: Predict/%/fluxVaccum.h5
-	python3 evolutionEarth.py -i $@ -o $@
+	python3 src/evolutionEarth.py -i $@ -o $@
+
+.SECONDEXPANSION:
+# MSW effect using 3 nu oscillation
+MSW/%/: data/$*/model.dat data/$*/flux.dat
+	echo
 .DELETE_ON_ERROR:
