@@ -13,6 +13,8 @@ export default defineUserConfig({
   theme: defaultTheme({
     logo: 'https://ars.els-cdn.com/content/image/1-s2.0-S0146641023000248-gr4.jpg',
 
+    repo: 'https://github.com/greatofdream/SolarNeutrino',
+
     navbar: ['/', '/SSM', '/SolarNeutrino'],
   }),
 
