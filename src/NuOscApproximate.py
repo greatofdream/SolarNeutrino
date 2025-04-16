@@ -1,6 +1,6 @@
 '''
 neutrino evolution in the Sun (Consider the element abundance distribution vs radius) and Vaccum, and Earth.
-The oscillation equation comes from 10.1016/j.ppnp.2023.104043 by Xunjie.
++ The approximated oscillation equation comes from 10.1016/j.ppnp.2023.104043 by Xunjie.
 '''
 import numpy as np, pandas as pd, h5py
 from SSMLoader import SpectraReaderFactory
