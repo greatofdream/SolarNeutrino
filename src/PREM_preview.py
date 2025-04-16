@@ -8,6 +8,11 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
 plt.style.use('./journal.mplstyle')
 from matplotlib.backends.backend_pdf import PdfPages
+import argparse
+
+psr = argparse.ArgumentParser()
+psr.add_argument('-o', dest='opt', default='prem_preview.pdf', help='output PDF file')
+args = psr.parse_args()
 
 R_core = 0.546 # 10.1103/PhysRevD.56.1792
 N_e_to_rho = np.array([0.468, 0.497]) # SK
@@ -23,7 +28,7 @@ N_earth = len(prem['radius'])
 N_core = np.sum((prem['radius'] / R_earth) <= R_core)
 N_mantle = N_earth - N_core
 
-with PdfPages('prem_preview.pdf') as pdf:
+with PdfPages(args.opt) as pdf:
     # Plot density and velocities
     fig, axs = plt.subplots(2, 1, figsize=(12, 12), sharex=True)
     fig.subplots_adjust(hspace=0)

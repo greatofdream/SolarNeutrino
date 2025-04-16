@@ -98,13 +98,18 @@ data/B16/flux.dat:
 	mkdir -p $(dir $@)
 	wget https://aliga.ice.csic.es/personal/aldos/Solar_Data_files/fluxes_b16.dat -O $@
 
-# data Preview
+# SSM data Preview
 data/%/preview.h5: data/%/model.dat  data/%/flux.dat
 	python3 src/SSMPreview.py -i $^ -o $@ --ssm $(*) > $@.log 2>&1
 	python3 src/SSMPreview.py -i $@ -o $@.pdf --ssm $(*) --plot
 data/Mesa%/preview.h5: data/Mesa%/model.dat
 	python3 src/SSMPreview.py -i $^ -o $@ --ssm Mesa > $@.log 2>&1
 	python3 src/SSMPreview.py -i $^ -o $@ --ssm Mesa --plot 
+
+# PREM preview
+data/PREM/preview.pdf:
+	mkdir -p $(@D)
+	python3 src/PREM_preview.py -o $@
 
 # Predict
 data/%/fluxSolar.h5: data/%/preview.h5 $(reactions:%=data/SPECTRA/%.dat)
