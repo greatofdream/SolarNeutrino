@@ -118,6 +118,10 @@ data/%/fluxSolar.h5: data/%/preview.h5 $(reactions:%=data/SPECTRA/%.dat)
 data/%/fluxEarth.h5: Predict/%/fluxVaccum.h5
 	python3 src/evolutionEarth.py -i $@ -o $@
 
+# Cross section
+predict/cs/preview.pdf:
+	mkdir -p $(@D)
+	python3 src/Test_CrossSection.py -o $@
 .SECONDEXPANSION:
 # MSW effect using 3 nu oscillation
 MSW/%/: data/$*/model.dat data/$*/flux.dat

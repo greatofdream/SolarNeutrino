@@ -1,4 +1,5 @@
 import matplotlib.colors as mcolors
+from scipy.constants import physical_constants
 # spectra line style
 spectras = ['N13', 'O15', 'F17', 'pp', 'B8', 'hep', 'Be7', 'pep']
 labels = ['$^{13}$N', '$^{15}$O', '$^{17}$F', 'pp', '$^{8}$B', 'hep', '$^{7}$Be', 'pep']
@@ -21,3 +22,7 @@ class constant():
     # 10^{-6} eV cm^3, 10^{-6} will be eliminated by MeV in E_nu
     # reference: fundamental neutrino physics and astrophysics
     sqrt2_G_F_N_A = 7.63*1e-8
+    m_e = physical_constants['electron mass energy equivalent in MeV'][0]
+    sin_theta_W_2 = physical_constants['weak mixing angle'][0]
+    G_F = physical_constants['Fermi coupling constant'][0]
+    hbar_c = physical_constants['reduced Planck constant times c in MeV fm'][0]
