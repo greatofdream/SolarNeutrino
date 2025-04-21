@@ -86,8 +86,9 @@ class CrossSection():
         # due to the value is small, store the power value in self.power
         # -6 comes from G_F GeV->MeV
         # natural unit lead to the (hbar*c)**{-2}, -13 comes from fm->cm
-        self.coeff = constant.hbar_c**2
-        self.power = -6*2 - 13*2
+        # 1E5 used for adjusting the final unit as 1E-43, suitable for drawing figure
+        self.coeff = constant.hbar_c**2 * 1E5
+        self.power = -6*2 - 13*2 - 5
 
     def I(self, T):
         x = np.sqrt(1 + 2 * self.m_e / T)
@@ -102,17 +103,25 @@ class CrossSection():
         sigma[T_e>T_max] = 0
         return sigma * self.coeff
 
-    def dif_T_nu_e(self, T_e, E_nu):
+    def dif_T_nu_e(self, T_e, E_nu, corr=True):
         # nu_e
-        rho_NC = 1.0126
-        kappa = 0.9791 + 0.0097 * self.I(T_e)
+        if corr:
+            rho_NC = 1.0126
+            kappa = 0.9791 + 0.0097 * self.I(T_e)
+        else:
+            rho_NC = 1
+            kappa = 1
         g_1, g_2 = 1 - rho_NC * (0.5 - kappa * self.s_theta_W_2), rho_NC * kappa * self.s_theta_W_2
         return self.dif_T(T_e, E_nu, g_1, g_2)
 
-    def dif_T_nu_mu(self, T_e, E_nu):
+    def dif_T_nu_mu(self, T_e, E_nu, corr=True):
         # nu_mu
-        rho_NC = 1.0126
-        kappa = 0.9970 - 0.00037 * self.I(T)
+        if corr:
+            rho_NC = 1.0126
+            kappa = 0.9970 - 0.00037 * self.I(T_e)
+        else:
+            rho_NC = 1
+            kappa = 1
         g_1, g_2 = rho_NC * (-0.5 + kappa * self.s_theta_W_2), rho_NC * kappa * self.s_theta_W_2
         return self.dif_T(T_e, E_nu, g_1, g_2)
 
