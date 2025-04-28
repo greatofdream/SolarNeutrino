@@ -96,9 +96,10 @@ if True:
             plt.close()
 
             # Upturn Preview
-            fig, ax = plt.subplots()
             Es = np.arange(0.1, 20, 0.1)
-            Pee = MSW_Adiabatic(Es, V_e(10**flux['Flux']['Log10_e_rho'][0]))
+            V_CC = V_e(10**flux['Flux']['Log10_e_rho'][0])
+            Pee = MSW_Adiabatic(Es, V_CC)
+            fig, ax = plt.subplots()
             ax.plot(Es, Pee, label='MSW-LMA')
             ax.set_ylabel('$P_{ee}$')
             ax.set_xlabel(r'$E_{\nu}$[MeV]')
@@ -111,8 +112,9 @@ if True:
             pdf.savefig(fig)
             plt.close()
 
-            fig, ax = plt.subplots()
             V_es = V_e(10**flux['Flux']['Log10_e_rho'])
+            fig, ax = plt.subplots()
+            ax2 = ax.twinx()
             X, Y = np.meshgrid(flux['Flux']['R'], Es)
             Pee = MSW_Adiabatic(Es, V_es)
             CS = ax.contour(X, Y, Pee, origin='lower', levels=np.arange(0.2,0.7,0.02), cmap='flag')
@@ -121,6 +123,8 @@ if True:
             ax.set_ylabel(r'$E_{\nu}$[MeV]')
             ax.set_ylim([0.1, 20])
             ax.set_xlim([0, 0.5])
+            ax2.plot(flux['Flux']['R'], V_es*1E6, ls='--', color='g')
+            ax2.set_ylabel(r'$V_{e}^0[10^{-12}\mathrm{eV}]$', color='g')
             pdf.savefig(fig)
             plt.close()
 
