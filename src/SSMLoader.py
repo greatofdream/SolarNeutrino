@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from mendeleev import element
 import re
 def SSMReaderFactory(SSMType):
     model, abundance = SSMType.split('/')
@@ -158,6 +157,7 @@ class PepReader():
 class Element():
     def __init__(self, ele_string):
         # split the mass number
+        from mendeleev import element
         res  = re.match('([^0-9]+)(\d*)', ele_string)
         self.ele_name = res.group(1)
         self.element = element(self.ele_name)
