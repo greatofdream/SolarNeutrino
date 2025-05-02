@@ -44,43 +44,39 @@ if True:
         # Spectra Preview
         fig, ax = plt.subplots()
         for reactionData, reaction in zip(figureDatas, reactions):
-            if reactionData.continous:
-                ls = '-' if reaction in reactions_pp else '--'
-                ys = reactionData.spectra['P']#/reactionData.binwidth
-                ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
-                xi = int(np.argmax(reactionData.spectra['P'])*spectraConfig[reaction]['x'])
-                ax.text(s=spectraConfig[reaction]['label'], x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], color=spectraConfig[reaction]['color'])
-            else:
-                for i in range(reactionData.spectraNum):
-                    ax.axline(reactionData.Es[i])
+            ls = '-' if reaction in reactions_pp else '--'
+            ys = reactionData.spectra['P']#/reactionData.binwidth
+            ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
+            xi = int(np.argmax(reactionData.spectra['P'])*spectraConfig[reaction]['x'])
+            ax.text(s=spectraConfig[reaction]['label'], x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], color=spectraConfig[reaction]['color'])
         ax.set_ylabel('P/MeV')
         ax.set_xlabel(r'$E_{\nu}$/MeV')
         ax.set_xlim([0.03, 20])
+        ax.set_ylim(bottom=1E-6)
         ax.set_yscale('log')
         pdf.savefig(fig)
         ax.set_xscale('log')
         pdf.savefig(fig)
         plt.close()
+
         # Rate Preview
         for flux in fluxDatas:
             fig, ax = plt.subplots()
             for reactionData, reaction in zip(figureDatas, reactions):
-                if reactionData.continous:
-                    ls = '-' if reaction in reactions_pp else '--'
-                    ys = reactionData.spectra['P'] * (flux['TotalFlux'][reaction]*10**flux['power'])
-                    ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
-                    xi = int(np.argmax(reactionData.spectra['P'])*spectraConfig[reaction]['x'])
-                    ax.text(s=spectraConfig[reaction]['label'], x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], color=spectraConfig[reaction]['color'])
-                else:
-                    for i in range(reactionData.spectraNum):
-                        ax.axline(reactionData.Es[i])
+                ls = '-' if reaction in reactions_pp else '--'
+                ys = reactionData.spectra['P'] * (flux['TotalFlux'][reaction] * 10 ** flux['power'][reaction])
+                ax.plot(reactionData.spectra['E'], ys, label=reaction, color=spectraConfig[reaction]['color'], ls = ls)
+                xi = int(np.argmax(reactionData.spectra['P'])*spectraConfig[reaction]['x'])
+                ax.text(s=spectraConfig[reaction]['label'], x=reactionData.spectra['E'][xi], y=spectraConfig[reaction]['y'] * ys[xi], color=spectraConfig[reaction]['color'])
             ax.set_ylabel('Flux[cm$^{-2}$s$^{-1}$MeV$^{-1}$]')
             ax.set_xlabel(r'$E_{\nu}$[MeV]')
             ax.set_xlim([0.03, 20])
+            ax.set_ylim(bottom=0.1)
             ax.set_yscale('log')
             ax.set_xscale('log')
             pdf.savefig(fig)
             plt.close()
+
             # Upturn Preview
             fig, ax = plt.subplots()
             Es = np.arange(0.1, 20, 0.1)
@@ -94,6 +90,7 @@ if True:
             ax.legend()
             pdf.savefig(fig)
             plt.close()
+
             fig, ax = plt.subplots()
             V_es = V_e(10**flux['Flux']['Log10_e_rho'])
             X, Y = np.meshgrid(flux['Flux']['R'], Es)
@@ -104,7 +101,6 @@ if True:
             ax.set_ylabel(r'$E_{\nu}$[MeV]')
             ax.set_ylim([0.1, 20])
             ax.set_xlim([0, 0.5])
-            ax.legend()
             pdf.savefig(fig)
             plt.close()
 

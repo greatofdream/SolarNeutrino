@@ -1,79 +1,109 @@
 .PHONY: all
-# Data
+all: data/BP2004/gs98/preview.h5 data/BP2005/gs98/preview.h5 data/BP2005/ags05/preview.h5 data/B16/gs98/preview.h5 data/B16/agss09/preview.h5
+all: data/BP2004/gs98/fluxSolar.h5 data/BP2005/gs98/fluxSolar.h5 data/BP2005/ags05/fluxSolar.h5 data/B16/gs98/fluxSolar.h5 data/B16/agss09/fluxSolar.h5
+# data
 reactions:=N13 O15 F17 pp B8 hep
-BP2004: Data/BP2004/gs98/model.dat Data/BP2004/gs98/flux.dat
-BSBGS98: Data/BP2005/gs98/model.dat Data/BP2005/gs98/flux.dat Data/BP2005/gs98/preview.h5
-BSBAGS05: Data/BP2005/ags05/model.dat Data/BP2005/ags05/flux.dat
-SPECTRA: Data/SPECTRA/Be7.dat Data/SPECTRA/B8.dat Data/SPECTRA/N13.dat Data/SPECTRA/O15.dat Data/SPECTRA/F17.dat Data/SPECTRA/pp.dat Data/SPECTRA/hep.dat Data/SPECTRA/preview.h5
+# BP2004
+BP2004: data/BP2004/gs98/model.dat data/BP2004/gs98/flux.dat
+# BP2005
+BSBGS98: data/BP2005/gs98/model.dat data/BP2005/gs98/flux.dat
+BSBAGS05: data/BP2005/ags05/model.dat data/BP2005/ags05/flux.dat
+# B16
+B16: data/B16/gs98/model.dat data/B16/gs98/flux.dat data/B16/agss09/model.dat data/B16/agss09/flux.dat data/B16/spectra.dat
+# X25
+X25GS98:
+X25AGSS09:
+X25MB22:
+
+# spectra shpae
+SPECTRA: data/SPECTRA/Be7.dat data/SPECTRA/B8.dat data/SPECTRA/N13.dat data/SPECTRA/O15.dat data/SPECTRA/F17.dat data/SPECTRA/pp.dat data/SPECTRA/hep.dat data/SPECTRA/preview.h5
 CROSSSECTION:
-OSCPARAS: Data/OSCPARAS/v52.release-SKoff-NO.txt Data/OSCPARAS/v52.release-SKoff-IO.txt
-# Data
-Data/OSCPARAS/%:
+OSCPARAS: data/OSCPARAS/v52.release-SKoff-NO.txt data/OSCPARAS/v52.release-SKoff-IO.txt
+# data
+data/OSCPARAS/%:
 	mkdir -p $(dir $@)
 	wget http://www.nu-fit.org/sites/default/files/$*.xz -O $@
 	unxz -d $@.xz
-Data/SPECTRA/Be7.dat:
+data/SPECTRA/Be7.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/7Belineshape/7belineshape.dat -O $@
-Data/SPECTRA/B8.dat:
+data/SPECTRA/B8.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/B8spectrum/b8spectrum.txt -O $@
-Data/SPECTRA/N13.dat:
+data/SPECTRA/N13.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/CNOspectra/n13.dat -O $@
-Data/SPECTRA/O15.dat:
+data/SPECTRA/O15.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/CNOspectra/o15.dat -O $@
-Data/SPECTRA/F17.dat:
+data/SPECTRA/F17.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/CNOspectra/f17.dat -O $@
-Data/SPECTRA/pp.dat:
+data/SPECTRA/pp.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/PPenergyspectrum/ppenergytab -O $@
-Data/SPECTRA/hep.dat:
+data/SPECTRA/hep.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/Hepspectrum/hepspectrum.dat -O $@
-Data/SPECTRA/T_table.dat:
+data/SPECTRA/T_table.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/Momentsspectra/T_table.dat -O $@
-Data/SPECTRA/T2_table.dat:
+data/SPECTRA/T2_table.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/Momentsspectra/T2_table.dat -O $@
-Data/SPECTRA/preview.h5: $(reactions:%=Data/SPECTRA/%.dat)
-	python3 SpectraPreview.py -i $^ --reactions $(reactions) -o $@ --models Data/BP2005/gs98/preview.h5
-Data/BP2004/gs98/model.dat:
+data/SPECTRA/preview.h5: $(reactions:%=data/SPECTRA/%.dat)
+	python3 SpectraPreview.py -i $^ data/SPECTRA/Be7.dat pep.dat --reactions $(reactions) Be7 pep -o $@ --models data/BP2005/gs98/preview.h5
+
+data/BP2004/gs98/model.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/BP2004/bp2004stdmodel.dat -O $@
-Data/BP2004/gs98/flux.dat:
+data/BP2004/gs98/flux.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/BP2004/bp2004flux.dat -O $@
 
-Data/BP2005/gs98/model.dat:
+data/BP2005/gs98/model.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/BS2005/bs05op.dat -O $@
-Data/BP2005/gs98/flux.dat:
+data/BP2005/gs98/flux.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/BS2005/bs2005opflux.dat -O $@
 
-Data/BP2005/ags05/model.dat:
+data/BP2005/ags05/model.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/BS2005/bs05_agsop.dat -O $@
-Data/BP2005/ags05/flux.dat:
+data/BP2005/ags05/flux.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/BS2005/bs2005agsopflux.dat -O $@
-# Data Preview
-Data/BP%/preview.h5: Data/BP%/model.dat  Data/BP%/flux.dat
-	python3 SSMPreview.py -i $^ -o $@ --ssm BSB > $@.log 2>&1
-	python3 SSMPreview.py -i $^ -o $@ --ssm BSB --plot
-Data/Mesa%/preview.h5: Data/Mesa%/model.dat
+
+data/B16/gs98/model.dat:
+	mkdir -p $(dir $@)
+	wget https://aliga.ice.csic.es/personal/aldos/Solar_Data_files/struct_b16_gs98.dat -O $@
+data/B16/gs98/flux.dat:
+	mkdir -p $(dir $@)
+	wget https://aliga.ice.csic.es/personal/aldos/Solar_Data_files/nudistr_b16_gs98.dat -O $@
+
+data/B16/agss09/model.dat:
+	mkdir -p $(dir $@)
+	wget https://aliga.ice.csic.es/personal/aldos/Solar_Data_files/struct_b16_agss09.dat -O $@
+data/B16/agss09/flux.dat:
+	mkdir -p $(dir $@)
+	wget https://aliga.ice.csic.es/personal/aldos/Solar_Data_files/nudistr_b16_agss09.dat -O $@
+
+data/B16/flux.dat:
+	mkdir -p $(dir $@)
+	wget https://aliga.ice.csic.es/personal/aldos/Solar_Data_files/fluxes_b16.dat -O $@
+
+# data Preview
+data/%/preview.h5: data/%/model.dat  data/%/flux.dat
+	python3 SSMPreview.py -i $^ -o $@ --ssm $(*) > $@.log 2>&1
+	python3 SSMPreview.py -i $@ -o $@.pdf --ssm $(*) --plot
+data/Mesa%/preview.h5: data/Mesa%/model.dat
 	python3 SSMPreview.py -i $^ -o $@ --ssm Mesa > $@.log 2>&1
 	python3 SSMPreview.py -i $^ -o $@ --ssm Mesa --plot 
-Data/B16%/preview.h5: Data/B16%/model.dat
-	python3 SSMPreview.py -i $^ -o $@ --ssm B16 > $@.log 2>&1
-	python3 SSMPreview.py -i $^ -o $@ --ssm B16 --plot 
 # Predict
-Data/%/fluxSolar.h5: Data/%/preview.h5 $(reactions:%=Data/SPECTRA/%.dat)
-	python3 NeutrinoEvolution.py -i $< -o $@ --spectra $(reactions:%=Data/SPECTRA/%.dat) --reactions $(reactions)
+data/%/fluxSolar.h5: data/%/preview.h5 $(reactions:%=data/SPECTRA/%.dat)
+	python3 NeutrinoEvolution.py -i $< -o $@ --spectra $(reactions:%=data/SPECTRA/%.dat) --reactions $(reactions)
 	python3 NeutrinoEvolution.py -i $@ -o $@.pdf --reactions $(reactions) --plot
-Data/%/fluxEarth.h5: Predict/%/fluxVaccum.h5
+data/%/fluxEarth.h5: Predict/%/fluxVaccum.h5
 	python3 evolutionEarth.py -i $@ -o $@
+.DELETE_ON_ERROR:
