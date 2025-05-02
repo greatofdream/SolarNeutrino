@@ -10,6 +10,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import MultipleLocator
 from config import spectraConfig
 from Oscillation import V_e, MSW_Adiabatic
+from config import oscParas
+NOpara = oscParas['nufit5.2NO_woSK']
+
 psr = argparse.ArgumentParser()
 psr.add_argument('-i', dest='ipt', nargs='+', help='spectra files')
 psr.add_argument('-o', dest='opt', help='output summary file')
@@ -98,9 +101,13 @@ if True:
             # Upturn Preview
             Es = np.arange(0.1, 20, 0.1)
             V_CC = V_e(10**flux['Flux']['Log10_e_rho'][0])
-            Pee = MSW_Adiabatic(Es, V_CC)
+            Pee = MSW_Adiabatic(Es, V_CC, delta_m21_2=NOpara['delta_m21_2'], delta_m3l_2=NOpara['delta_m3l_2'], s12_2=NOpara['s12_2'], s13_2=NOpara['s13_2'],)
+            P_0 = (1 - NOpara['s13_2'])**2 * (1 - 2 * NOpara['s12_2'] * (1 - NOpara['s12_2'])) + NOpara['s13_2']**2
+            P_1 = (1 - NOpara['s13_2'])**2 * NOpara['s12_2'] + NOpara['s13_2']**2
             fig, ax = plt.subplots()
             ax.plot(Es, Pee, label='MSW-LMA')
+            ax.axhline(P_0, ls='--', c='r', label=r'$c_{13}^4(1-\frac{1}{2}\sin^2{2\theta_{12}})+s_{13}^4$')
+            ax.axhline(P_1, ls='--', c='g', label=r'$c_{13}^4c_{12}^2+s_{13}^4$')
             ax.set_ylabel('$P_{ee}$')
             ax.set_xlabel(r'$E_{\nu}$[MeV]')
             ax.set_xlim([0.1, 20])
