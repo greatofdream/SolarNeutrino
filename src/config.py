@@ -20,9 +20,13 @@ oscParas = dict([
 ])
 class constant():
     # 10^{-6} eV cm^3, 10^{-6} will be eliminated by MeV in E_nu
-    # reference: fundamental neutrino physics and astrophysics
+    # reference: Equ9.23 in fundamental neutrino physics and astrophysics
     sqrt2_G_F_N_A = 7.63*1e-8
+    # other constants
     m_e = physical_constants['electron mass energy equivalent in MeV'][0]
     sin_theta_W_2 = physical_constants['weak mixing angle'][0]
+    # unit is GeV^-2
     G_F = physical_constants['Fermi coupling constant'][0]
+    # for natural unit, it could transfer MeV-1 to fm; eV-1 to nm
     hbar_c = physical_constants['reduced Planck constant times c in MeV fm'][0]
+    N_A = physical_constants['Avogadro constant'][0]
