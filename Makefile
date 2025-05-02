@@ -57,7 +57,7 @@ data/SPECTRA/T2_table.dat:
 	mkdir -p $(dir $@)
 	wget http://www.sns.ias.edu/~jnb/SNdata/Export/Momentsspectra/T2_table.dat -O $@
 data/SPECTRA/preview.h5: $(reactions:%=data/SPECTRA/%.dat)
-	python3 SpectraPreview.py -i $^ data/SPECTRA/Be7.dat pep.dat --reactions $(reactions) Be7 pep -o $@ --models data/BSB05/gs98/preview.h5
+	python3 src/SpectraPreview.py -i $^ data/SPECTRA/Be7.dat pep.dat --reactions $(reactions) Be7 pep -o $@ --models data/BSB05/gs98/preview.h5
 
 data/BP2004/gs98/model.dat:
 	mkdir -p $(dir $@)
@@ -122,8 +122,27 @@ data/%/fluxEarth.h5: Predict/%/fluxVaccum.h5
 predict/cs/preview.pdf:
 	mkdir -p $(@D)
 	python3 src/Test_CrossSection.py -o $@
+
 .SECONDEXPANSION:
 # MSW effect using 3 nu oscillation
-MSW/%/: data/$*/model.dat data/$*/flux.dat
-	echo
+msw_sun: MSW/B16/gs98/sun_R.h5 MSW/B16/gs98/preview.pdf
+sun_r:=$(shell seq 0.01 0.02 0.31)
+MSW/%/sun_R.h5: $(foreach r,$(sun_r),MSW/%/sun_R$(r).h5)
+	python3 src/NuOsc.py -i data/$*/preview.h5 -o $@ --merge --merge_f $^
+
+define msw_sun_f
+MSW/%/sun_R$(1).h5: data/%/preview.h5
+	mkdir -p $$(@D)
+	$(JOB) python3 src/NuOsc.py -i $$^ -o $$@ --mode sun --R $(1)
+
+endef
+$(eval $(foreach r,$(sun_r),$(call msw_sun_f,$(r))))
+
+MSW/%/earth.h5:
+	python3 src/NuOsc.py -i none -o $@ --mode earth
+
+MSW/%/preview.pdf: MSW/$$*/sun_R.h5
+	python3 src/NuOscPreview.py --sun $^ -o $@
+
 .DELETE_ON_ERROR:
+.SECONDARY:
