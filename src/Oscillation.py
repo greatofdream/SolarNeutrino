@@ -191,6 +191,12 @@ class CrossSection():
     def T_max(self, E_nu):
         return self.c_theta_T(E_nu, -1)
 
+    def c_theta_E(self, T, c_theta):
+        return self.m_e / (np.sqrt(2 * self.m_e / T + 1) * c_theta - 1)
+
+    def c_theta_min(self, T):
+        return 1 / np.sqrt(2 * self.m_e / T_e + 1)
+
 class MSW():
     def __init__(self, radius, rho_e, R):
         self.model = {'Radius': radius, 'rho_e': rho_e}
