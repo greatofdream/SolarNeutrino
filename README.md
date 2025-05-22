@@ -25,6 +25,6 @@ The pattern of the directory is same as `Data` directory.
 
 # Code
 The code are executed as `Makefile`. Following code scripts are in the execution order.
-+ `SSMPreview.py`
-+ `SpectraPreview.py`
-+ `NeutrinoEvolution.py`
++ `SSMPreview.py`: Check the SSM
++ `SpectraPreview.py`: Check the spectra
++ `NuOscApproximate.py`: LMA approximation and simple calculation example

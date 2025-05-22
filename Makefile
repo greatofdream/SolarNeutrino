@@ -113,8 +113,8 @@ data/PREM/preview.pdf:
 
 # Predict
 data/%/fluxSolar.h5: data/%/preview.h5 $(reactions:%=data/SPECTRA/%.dat)
-	python3 src/NeutrinoEvolution.py -i $< -o $@ --spectra $(reactions:%=data/SPECTRA/%.dat) --reactions $(reactions)
-	python3 src/NeutrinoEvolution.py -i $@ -o $@.pdf --reactions $(reactions) --plot
+	python3 src/NuOscApproximate.py -i $< -o $@ --spectra $(reactions:%=data/SPECTRA/%.dat) --reactions $(reactions)
+	python3 src/NuOscApproximate.py -i $@ -o $@.pdf --reactions $(reactions) --plot
 data/%/fluxEarth.h5: Predict/%/fluxVaccum.h5
 	python3 src/evolutionEarth.py -i $@ -o $@
 
