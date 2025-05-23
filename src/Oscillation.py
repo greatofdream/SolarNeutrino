@@ -192,7 +192,9 @@ class CrossSection():
         return self.c_theta_T(E_nu, -1)
 
     def c_theta_E(self, T, c_theta):
-        return self.m_e / (np.sqrt(2 * self.m_e / T + 1) * c_theta - 1)
+        c_theta_boundary = self.c_theta_min(T)
+        mask = c_theta < c_theta_boundary
+        return self.m_e / (np.sqrt(2 * self.m_e / T + 1) * c_theta - 1), mask
 
     def c_theta_min(self, T):
         return 1 / np.sqrt(2 * self.m_e / T + 1)

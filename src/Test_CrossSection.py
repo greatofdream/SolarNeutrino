@@ -31,10 +31,12 @@ d_sigma_nu_mu = cs.dif_T_nu_mu(T_e[np.newaxis, :], E_nu[:, np.newaxis], corr=Fal
 # T_e=0.1MeV min(cos_theta_e)=0.299, it is suitable to select 0.25 as the cut edge
 theta_e_edges = np.linspace(0.25, 1, 2500)
 theta_es = (theta_e_edges[1:] + theta_e_edges[:-1]) / 2
-E_nus = cs.c_theta_E(T_e[:, np.newaxis], theta_es[np.newaxis, :])
-E_nus[E_nus<0] = 0
-f_E_e_E_nu = cs.dif_T_nu_e(T_e[:, np.newaxis], E_nus)
-f_E_e_theta_e = f_E_e_E_nu * E_nus * (1 + E_nus / cs.m_e)
+E_nus, mask = cs.c_theta_E(T_e[:, np.newaxis], theta_es[np.newaxis, :])
+# E_nus[E_nus<0] = 0
+E_nus_mask = np.ma.array(E_nus, mask=mask)
+print('negative values number: {}'.format(np.sum(E_nus_mask<=0)))
+f_E_e_E_nu = cs.dif_T_nu_e(T_e[:, np.newaxis], E_nus_mask)
+f_E_e_theta_e = f_E_e_E_nu * E_nus_mask * (1 + E_nus_mask / cs.m_e)
 
 
 def E_nu_T(fig, ax, X, Y, d_sigma_nu):
@@ -94,7 +96,7 @@ with PdfPages(args.opt) as pdf:
     X, Y = np.meshgrid(T_e, theta_es)
 
     fig, ax = plt.subplots()
-    surf = ax.pcolormesh(X, Y, E_nus.T, norm=mcolors.LogNorm(), cmap=cm.jet, linewidth=0, rasterized=True)
+    surf = ax.pcolormesh(X, Y, E_nus_mask.T, norm=mcolors.LogNorm(), cmap=cm.jet, linewidth=0, rasterized=True)
     ax.xaxis.set_minor_locator(MultipleLocator(1))
     ax.xaxis.set_major_locator(MultipleLocator(5))
     ax.yaxis.set_minor_locator(MultipleLocator(0.05))
