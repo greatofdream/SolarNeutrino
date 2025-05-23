@@ -195,7 +195,7 @@ class CrossSection():
         return self.m_e / (np.sqrt(2 * self.m_e / T + 1) * c_theta - 1)
 
     def c_theta_min(self, T):
-        return 1 / np.sqrt(2 * self.m_e / T_e + 1)
+        return 1 / np.sqrt(2 * self.m_e / T + 1)
 
 class MSW():
     def __init__(self, radius, rho_e, R):

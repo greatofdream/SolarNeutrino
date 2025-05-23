@@ -20,6 +20,8 @@ def SpectraReaderFactory(reaction, f):
         reader = SpectraBareTwoColReader(f)
     elif reaction == 'B8':
         reader = B8Reader(f)
+    elif reaction == 'B8_winter':
+        reader = B8Reader(f, winter=True)
     elif reaction == 'Be7':
         reader = Be7Reader(f)
     elif reaction == 'pep':
@@ -110,12 +112,17 @@ class MB22Reader():
        pass 
 
 class B8Reader():
-    def __init__(self, file, continous=True):
-        self.skipFooter = 2
-        self.skipHeader = 16
-        self.header = ['E', 'P', 'sigmaPlus', 'sigmaMinus']
+    def __init__(self, filename, continous=True, winter=False):
         self.continous = continous
-        self.spectra = pd.read_csv(file, skiprows=self.skipHeader, skipfooter=self.skipFooter, sep='\s+', names=self.header, engine='python')
+        if not winter:
+            self.skipFooter = 2
+            self.skipHeader = 16
+            self.header = ['E', 'P', 'sigmaPlus', 'sigmaMinus']
+        else:
+            self.skipFooter = 0
+            self.skipHeader = 0
+            self.header = ['E', 'P', 'sigma']
+        self.spectra = pd.read_csv(filename, skiprows=self.skipHeader, skipfooter=self.skipFooter, sep='\s+', names=self.header, engine='python')
         self.binwidth = self.spectra.iloc[1]['E']-self.spectra.iloc[0]['E']
 
 class PPReader():
