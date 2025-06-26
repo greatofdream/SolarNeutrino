@@ -147,13 +147,14 @@ class CrossSection():
         z = T_e / E_nu
         T_max = self.T_max(E_nu)
         sigma = 2 * self.G_F**2 * self.m_e / np.pi * (
-                g_1**2 + g_2**2 * (1 - z**2) - g_1 * g_2 * self.m_e * z / E_nu
+                g_1**2 + g_2**2 * (1 - z)**2 - g_1 * g_2 * self.m_e * z / E_nu
                 )
         sigma[T_e>T_max] = 0
         return sigma * self.coeff
 
     def dif_T_nu_e(self, T_e, E_nu, corr=True):
         # nu_e
+        # g_1 = g_A + g_V, g_2 = g_V - g_A
         if corr:
             rho_NC = 1.0126
             kappa = 0.9791 + 0.0097 * self.I(T_e)

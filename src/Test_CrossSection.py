@@ -18,8 +18,11 @@ args = psr.parse_args()
 cs = CrossSection()
 # check the cross section
 binwidth = 0.1
-E_nu = np.arange(1, 21, binwidth)
-T_e = np.arange(0.1, 21, binwidth)
+E_nu_s, E_max = 1, 21
+T_e_s = 0.1
+
+E_nu = np.arange(E_nu_s, E_max, binwidth)
+T_e = np.arange(T_e_s, E_max, binwidth)
 T_max = cs.T_max(E_nu)
 d_sigma_nu_e_corr = cs.dif_T_nu_e(T_e[np.newaxis, :], E_nu[:, np.newaxis])
 d_sigma_nu_mu_corr = cs.dif_T_nu_mu(T_e[np.newaxis, :], E_nu[:, np.newaxis])
@@ -80,6 +83,26 @@ with PdfPages(args.opt) as pdf:
     pdf.savefig(fig)
     plt.close()
 
+    # select the E_nu_check=10MeV for check
+    E_nu_check, scale = 10, 100
+    E_nu_i = int((E_nu_check - E_nu_s) / binwidth)
+    fig, ax = plt.subplots()
+    ax.plot(T_e, scale * d_sigma_nu_e_corr[E_nu_i], color='b', label=r'$\nu_e$ radiative correction')
+    ax.plot(T_e, scale * d_sigma_nu_mu_corr[E_nu_i], color='g', label=r'$\nu_\mu$ radiative correction')
+    ax.plot(T_e, scale * d_sigma_nu_e[E_nu_i], color='b', ls='--', label=r'$\nu_e$')
+    ax.plot(T_e, scale * d_sigma_nu_mu[E_nu_i], color='g', ls='--', label=r'$\nu_\mu$')
+    ax.xaxis.set_minor_locator(MultipleLocator(0.5))
+    ax.xaxis.set_major_locator(MultipleLocator(2))
+    ax.yaxis.set_major_locator(MultipleLocator(2.5))
+    ax.yaxis.set_minor_locator(MultipleLocator(0.5))
+    ax.set_xlim([0, E_nu_check*1.1])
+    ax.set_ylim(bottom=0)
+    ax.set_xlabel(r'$T_{e}$[MeV]')
+    ax.set_ylabel(r'$\frac{\mathrm{d}\sigma}{\mathrm{d}T_e}$[$10^{' + '{}'.format(cs.power - 2) + '}\mathrm{cm}^2$]')
+    ax.legend()
+    pdf.savefig(fig)
+    plt.close()
+
     fig, ax = plt.subplots()
     E_nu_T(fig, ax, X, Y, d_sigma_nu_e_corr)
     ax.set_xlabel(r'$E_{\nu_e}$[MeV]')
@@ -122,3 +145,19 @@ with PdfPages(args.opt) as pdf:
     ax.set_ylabel(r'$\cos\theta_e$')
     pdf.savefig(fig)
     plt.close()
+
+    fig, ax = plt.subplots()
+    f_E_e_theta_e[E_nus_mask > E_max] = 0
+    surf = ax.pcolormesh(X, Y, f_E_e_theta_e.T, norm=mcolors.LogNorm(), cmap=cm.jet, linewidth=0, rasterized=True)
+    ax.xaxis.set_minor_locator(MultipleLocator(1))
+    ax.xaxis.set_major_locator(MultipleLocator(5))
+    ax.yaxis.set_minor_locator(MultipleLocator(0.05))
+    ax.yaxis.set_major_locator(MultipleLocator(0.25))
+    cbar = fig.colorbar(surf)
+    cbar.set_label(r'$\frac{\mathrm{d}\sigma}{\mathrm{d}T_e}\frac{\mathrm{d}E_\nu}{\mathrm{d}\cos\theta_e}$[$10^{' + '{}'.format(cs.power) + '}\mathrm{cm}^2$/MeV]', fontsize=15)
+    # cbar.ax.tick_params(size=1, labelsize=1)
+    ax.set_xlabel(r'$T_{e}$[MeV]')
+    ax.set_ylabel(r'$\cos\theta_e$')
+    pdf.savefig(fig)
+    plt.close()
+
