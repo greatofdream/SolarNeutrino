@@ -174,10 +174,19 @@ class CrossSection():
             kappa = 1
         g_1, g_2 = rho_NC * (-0.5 + kappa * self.s_theta_W_2), rho_NC * kappa * self.s_theta_W_2
         return self.dif_T(T_e, E_nu, g_1, g_2)
+    
+    def dif_ctheta_nu_e(self, c_theta, E_nu, corr=True):
+        T = self.c_theta_T(E_nu, c_theta)
+        # The following relation could be deduced from Equ.5.29 in Fundamentals of Neutrino Physics and Astrophysics
+        return self.dif_T_nu_e(T, T_nu, corr) * 2 * (self.m_e + E_nu)**2 * T / c_theta
 
-    def T_c_theta(self, T):
+    def dif_ctheta_nu_mu(self, c_theta, E_nu, corr=True):
+        T = self.c_theta_T(E_nu, c_theta)
+        # The following relation could be deduced from Equ.5.29 in Fundamentals of Neutrino Physics and Astrophysics
+        return self.dif_T_nu_mu(T, T_nu, corr) * 2 * (self.m_e + E_nu)**2 * T / c_theta
+
+    def T_c_theta(self, E_nu, T):
         # Equ 5.27 in fudamental neutrino physics
-        c_theta_2 = c_theta**2 
         E_nu_2 = E_nu**2
         return np.sqrt(
                 T * (self.m_e + E_nu)**2 / E_nu_2 / (T + 2 * self.m_e)
