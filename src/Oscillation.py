@@ -184,13 +184,14 @@ class CrossSection():
                 )
 
     def c_theta_T(self, E_nu, c_theta):
-        # Equ 5.27 in fudamental neutrino physics
+        # Equ 5.27 in Fundamentals of Neutrino Physics and Astrophysics
+        # Return electron kinetic energy T
         c_theta_2 = c_theta**2 
         E_nu_2 = E_nu**2
         return 2 * self.m_e * E_nu_2 * c_theta_2 / ((self.m_e + E_nu)**2 - E_nu_2 * c_theta_2)
 
     def T_max(self, E_nu):
-        return self.c_theta_T(E_nu, -1)
+        return self.c_theta_T(E_nu, 1)
 
     def c_theta_E(self, T, c_theta):
         c_theta_boundary = self.c_theta_min(T)
