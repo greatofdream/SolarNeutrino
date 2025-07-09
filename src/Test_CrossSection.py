@@ -81,6 +81,8 @@ with PdfPages(args.opt) as pdf:
     ax.set_ylabel('$\sigma$[$10^{' + '{}'.format(cs.power) + '}\mathrm{cm}^2$]')
     ax.legend()
     pdf.savefig(fig)
+    ax.set_yscale('log')
+    pdf.savefig(fig)
     plt.close()
 
     # select the E_nu_check=10MeV for check
