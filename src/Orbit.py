@@ -32,7 +32,10 @@ class Orbit():
         # delta_longitude = longitude - self.rotationAngle(self)
         # t, latitude, longitude, elevation
         # The sunpos in sunposition package consider the refraction of atmosphere, which is useless
+        ## start time: Y=-4712,M=1,D=1,12:00. Equ 4 in 10.1016/j.solener.2003.12.003
+        ## The magic number explanation: https://www.zhihu.com/question/21698547
         jd = sunposition.julian_day(timestamp)
+        ## 
         latitude, longitude = sunposition._norm_lat_lon(self.latitude, self.longitude)
         elevation, Delta_t = 0, 0
         alpha_prime, delta_prime, H_prime = sunposition._sun_topo_ra_decl_hour(latitude, longitude, elevation, jd, Delta_t)
