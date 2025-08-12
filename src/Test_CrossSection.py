@@ -36,11 +36,21 @@ theta_e_edges = np.linspace(0.25, 1, 2500)
 theta_es = (theta_e_edges[1:] + theta_e_edges[:-1]) / 2
 E_nus, mask = cs.c_theta_E(T_e[:, np.newaxis], theta_es[np.newaxis, :])
 # E_nus[E_nus<0] = 0
-E_nus_mask = np.ma.array(E_nus, mask=mask)
-print('negative values number: {}'.format(np.sum(E_nus_mask<=0)))
-f_E_e_E_nu = cs.dif_T_nu_e(T_e[:, np.newaxis], E_nus_mask)
-f_E_e_theta_e = f_E_e_E_nu * E_nus_mask * (1 + E_nus_mask / cs.m_e)
 
+def get_f_E_e_theta_e(mask):
+    E_nus_mask = np.ma.array(E_nus, mask=mask)
+    print('negative values number: {}'.format(np.sum(E_nus_mask<=0)))
+    f_E_e_E_nu = cs.dif_T_nu_e(T_e[:, np.newaxis], E_nus_mask)
+    return E_nus_mask, f_E_e_E_nu * E_nus_mask * (1 + E_nus_mask / cs.m_e)
+
+E_nus_mask, f_E_e_theta_e = get_f_E_e_theta_e(mask)
+
+E_nu_select_1 = [6, 8]
+E_nu_select_2 = [16, 18]
+
+E_nus_mask_1, f_E_e_theta_e_1 = get_f_E_e_theta_e(mask | (E_nus <E_nu_select_1[0]) | (E_nus >E_nu_select_1[1]))
+
+E_nus_mask_2, f_E_e_theta_e_2 = get_f_E_e_theta_e(mask | (E_nus <E_nu_select_2[0])| (E_nus >E_nu_select_2[1]))
 
 def E_nu_T(fig, ax, X, Y, d_sigma_nu):
     surf = ax.pcolormesh(X, Y, d_sigma_nu.T, norm=mcolors.LogNorm(), cmap=cm.jet, linewidth=0, rasterized=True)
@@ -120,46 +130,27 @@ with PdfPages(args.opt) as pdf:
     # check the solar angle
     X, Y = np.meshgrid(T_e, theta_es)
 
-    fig, ax = plt.subplots()
-    surf = ax.pcolormesh(X, Y, E_nus_mask.T, norm=mcolors.LogNorm(), cmap=cm.jet, linewidth=0, rasterized=True)
-    ax.xaxis.set_minor_locator(MultipleLocator(1))
-    ax.xaxis.set_major_locator(MultipleLocator(5))
-    ax.yaxis.set_minor_locator(MultipleLocator(0.05))
-    ax.yaxis.set_major_locator(MultipleLocator(0.25))
-    cbar = fig.colorbar(surf)
-    cbar.set_label(r'$E_\nu$[MeV]', fontsize=15)
-    # cbar.ax.tick_params(size=1, labelsize=1)
-    ax.set_xlabel(r'$T_{e}$[MeV]')
-    ax.set_ylabel(r'$\cos\theta_e$')
-    pdf.savefig(fig)
-    plt.close()
+    def check2d(arr, cbar_label):
+        fig, ax = plt.subplots()
+        surf = ax.pcolormesh(X, Y, arr, norm=mcolors.LogNorm(), cmap=cm.jet, linewidth=0, rasterized=True)
+        ax.xaxis.set_minor_locator(MultipleLocator(1))
+        ax.xaxis.set_major_locator(MultipleLocator(5))
+        ax.yaxis.set_minor_locator(MultipleLocator(0.05))
+        ax.yaxis.set_major_locator(MultipleLocator(0.25))
+        cbar = fig.colorbar(surf)
+        cbar.set_label(cbar_label, fontsize=15)
+        ax.set_xlabel(r'$T_{e}$[MeV]')
+        ax.set_ylabel(r'$\cos\theta_e$')
+        pdf.savefig(fig)
+        plt.close()
 
-    fig, ax = plt.subplots()
-    surf = ax.pcolormesh(X, Y, f_E_e_theta_e.T, norm=mcolors.LogNorm(), cmap=cm.jet, linewidth=0, rasterized=True)
-    ax.xaxis.set_minor_locator(MultipleLocator(1))
-    ax.xaxis.set_major_locator(MultipleLocator(5))
-    ax.yaxis.set_minor_locator(MultipleLocator(0.05))
-    ax.yaxis.set_major_locator(MultipleLocator(0.25))
-    cbar = fig.colorbar(surf)
-    cbar.set_label(r'$\frac{\mathrm{d}\sigma}{\mathrm{d}T_e}\frac{\mathrm{d}E_\nu}{\mathrm{d}\cos\theta_e}$[$10^{' + '{}'.format(cs.power) + '}\mathrm{cm}^2$/MeV]', fontsize=15)
-    # cbar.ax.tick_params(size=1, labelsize=1)
-    ax.set_xlabel(r'$T_{e}$[MeV]')
-    ax.set_ylabel(r'$\cos\theta_e$')
-    pdf.savefig(fig)
-    plt.close()
+    check2d(E_nus_mask.T, r'$E_\nu$[MeV]')
 
-    fig, ax = plt.subplots()
+    check2d(f_E_e_theta_e.T, r'$\frac{\mathrm{d}\sigma}{\mathrm{d}T_e}\frac{\mathrm{d}E_\nu}{\mathrm{d}\cos\theta_e}$[$10^{' + '{}'.format(cs.power) + '}\mathrm{cm}^2$/MeV]')
+
     f_E_e_theta_e[E_nus_mask > E_max] = 0
-    surf = ax.pcolormesh(X, Y, f_E_e_theta_e.T, norm=mcolors.LogNorm(), cmap=cm.jet, linewidth=0, rasterized=True)
-    ax.xaxis.set_minor_locator(MultipleLocator(1))
-    ax.xaxis.set_major_locator(MultipleLocator(5))
-    ax.yaxis.set_minor_locator(MultipleLocator(0.05))
-    ax.yaxis.set_major_locator(MultipleLocator(0.25))
-    cbar = fig.colorbar(surf)
-    cbar.set_label(r'$\frac{\mathrm{d}\sigma}{\mathrm{d}T_e}\frac{\mathrm{d}E_\nu}{\mathrm{d}\cos\theta_e}$[$10^{' + '{}'.format(cs.power) + '}\mathrm{cm}^2$/MeV]', fontsize=15)
-    # cbar.ax.tick_params(size=1, labelsize=1)
-    ax.set_xlabel(r'$T_{e}$[MeV]')
-    ax.set_ylabel(r'$\cos\theta_e$')
-    pdf.savefig(fig)
-    plt.close()
+    check2d(f_E_e_theta_e.T, r'$\frac{\mathrm{d}\sigma}{\mathrm{d}T_e}\frac{\mathrm{d}E_\nu}{\mathrm{d}\cos\theta_e}$[$10^{' + '{}'.format(cs.power) + '}\mathrm{cm}^2$/MeV]')
 
+    check2d(f_E_e_theta_e_1.T, r'$\frac{\mathrm{d}\sigma}{\mathrm{d}T_e}\frac{\mathrm{d}E_\nu}{\mathrm{d}\cos\theta_e}$[$10^{' + '{}'.format(cs.power) + '}\mathrm{cm}^2$/MeV]')
+
+    check2d(f_E_e_theta_e_2.T, r'$\frac{\mathrm{d}\sigma}{\mathrm{d}T_e}\frac{\mathrm{d}E_\nu}{\mathrm{d}\cos\theta_e}$[$10^{' + '{}'.format(cs.power) + '}\mathrm{cm}^2$/MeV]')
